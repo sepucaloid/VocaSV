@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import { ThemeProvider } from "./utils/ThemeProvider";
 import { AudioPlayerProvider } from "./utils/AudioPlayerContext";
@@ -8,7 +8,7 @@ import ArtistDetail from "./pages/ArtistDetail";
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ThemeProvider>
         <AudioPlayerProvider>
           <Routes>
@@ -19,7 +19,7 @@ const App = () => {
           <AudioPlayer />
         </AudioPlayerProvider>
       </ThemeProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
