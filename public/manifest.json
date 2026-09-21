@@ -10,7 +10,8 @@
     {
       "src": "/icons.png",
       "sizes": "326x326",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
