@@ -8,8 +8,8 @@ const Navbars = ({ isBack = false }) => {
 
   const navs = [
     { name: "Home", url: "/" },
-    { name: "Album", url: "/album" },
-    { name: "Artist", url: "/artist" },
+    // { name: "Album", url: "/album" },
+    // { name: "Artist", url: "/artist" },
   ];
 
   return (
