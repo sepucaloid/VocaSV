@@ -15,6 +15,8 @@ import {
   ListMusic,
   Download,
   ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 import { getDetail, getLyric } from "../services/song.services";
 import { getDownloadLinks, downloadFile } from "../utils/download.services";
@@ -52,6 +54,7 @@ const Detail = () => {
   const [downloadLinks, setDownloadLinks] = useState(null);
   const [loadingDownload, setLoadingDownload] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const darkMode = theme === "dark";
   const cardBg = darkMode ? "#2a2a3e" : "#d9d9d9";
@@ -113,6 +116,81 @@ const Detail = () => {
   const youtubePv = data?.pvs?.find(
     (pv) => pv.service === "Youtube" || pv.url?.includes("youtu")
   );
+
+  const copySongInfo = async () => {
+    const lines = [];
+
+    lines.push(`Name\t${song.defaultName}`);
+
+    if (data?.additionalNames) {
+      lines.push(data.additionalNames);
+    }
+
+    if (vocalists.length > 0) {
+      lines.push(`Vocalists\t${vocalists.map((a) => a.artist?.name).join(", ")}`);
+    }
+
+    if (producers.length > 0) {
+      lines.push(`Producers\t${producers.map((a) => a.artist?.name).join(", ")}`);
+    }
+
+    const animators = data?.artists?.filter((a) => a.categories?.includes("Animator")) || [];
+    if (animators.length > 0) {
+      lines.push(`Animators\t${animators.map((a) => a.artist?.name).join(", ")}`);
+    }
+
+    if (otherArtists.length > 0) {
+      lines.push(`Other artists\t${otherArtists.map((a) => `${a.artist?.name} (${a.effectiveRoles})`).join(", ")}`);
+    }
+
+    lines.push(`Type\t${song.songType === "Original" ? "O Original song" : song.songType}`);
+    lines.push(`Duration\t${DurationFormat(song.lengthSeconds)}`);
+    lines.push(`Language(s)\t${song.defaultNameLanguage}`);
+    lines.push(`BPM\t${BpmFormat(data?.minMilliBpm, data?.maxMilliBpm)}`);
+
+    if (tags?.length > 0) {
+      lines.push(`Tags\t${tags.map((t) => t?.name).join(", ")}`);
+    }
+
+    if (data?.pvs?.length > 0) {
+      const pvLines = data.pvs.map((pv) => `${pv.service}\t${pv.name || pv.service}\t${pv.url}`);
+      lines.push(`PV Sources\t`);
+      lines.push(pvLines.join("\n"));
+    }
+
+    const stats = [];
+    if (song.favoritedTimes) stats.push(`${song.favoritedTimes} favorite(s)`);
+    if (song.ratingScore) stats.push(`${song.ratingScore} total score`);
+    if (data?.hits) stats.push(`${data.hits} hit(s)`);
+    if (stats.length > 0) {
+      lines.push(`Statistics\t${stats.join(", ")}`);
+    }
+
+    lines.push(`Published\t${DateFormat(song.publishDate)}`);
+
+    if (lyric) {
+      lines.push("");
+      lines.push(lyric);
+    }
+
+    const text = lines.join("\n");
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      console.error("Copy failed:", e);
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   useEffect(() => {
     if (activeTab !== "download" || !youtubePv || downloadLinks || loadingDownload) return;
@@ -342,6 +420,24 @@ const Detail = () => {
                       fill={liked ? "#ee0055" : "none"}
                       color={liked ? "#ee0055" : "#999"}
                     />
+                  </button>
+                  <button
+                    onClick={copySongInfo}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                    title={copied ? "Copied!" : "Copy song info"}
+                  >
+                    {copied ? (
+                      <Check size={20} color="#4caf50" />
+                    ) : (
+                      <Copy size={20} color="#999" />
+                    )}
                   </button>
                   <Share2
                     size={20}
