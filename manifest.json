@@ -2,13 +2,13 @@
   "name": "VocaSV || VocaDB Frontend",
   "short_name": "VocaSV",
   "display": "standalone",
-  "start_url": "/",
+  "start_url": "/VocaSV/",
   "background_color": "#1a1a2e",
   "theme_color": "#f0f2f5",
   "orientation": "any",
   "icons": [
     {
-      "src": "./icons.png",
+      "src": "/VocaSV/icons.png",
       "sizes": "326x326",
       "type": "image/png",
       "purpose": "any"
