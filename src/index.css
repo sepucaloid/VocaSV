@@ -1,0 +1,79 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* theme === 'light' ? "#e0e0e0" : "#212529"; */
+
+[data-theme="light"] body {
+  --color: #212529;
+}
+
+[data-theme="dark"] body {
+  --color: #e0e0e0;
+}
+
+body {
+  overflow: hidden;
+}
+
+/* .link-card:hover {
+  text-decoration: underline;
+} */
+
+a.link-underline:hover {
+  text-decoration: underline !important;
+}
+
+.search::placeholder {
+  color: var(--color);
+}
+
+.artist-link {
+  transition: color 0.2s;
+}
+.artist-link:hover {
+  color: #5a8dee !important;
+}
+
+@media (max-width: 480px) {
+  .thumbLogoY {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .thumbLogoY {
+    width: 50%;
+  }
+}
+
+@media (min-width: 992px) {
+  .thumbLogoY {
+    width: 25%;
+  }
+}
+
+.scroll-dark::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-dark::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+
+.scroll-light::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-light::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-light::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 3px;
+}
