@@ -320,7 +320,9 @@ const Home = () => {
                     padding: "5px 14px",
                   }}
                 >
-                  {sortList?.find((t) => t.value === sortBy).name}
+                  {sortBy === "RatingScore"
+                    ? "Rating score"
+                    : sortList?.find((t) => t.value === sortBy).name}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   {sortList?.map((t) => (
