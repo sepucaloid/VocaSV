@@ -8,10 +8,10 @@ const Axios = axios.create({
   },
 });
 
-export const GetAllSongs = async (pages, search, tags) => {
+export const GetAllSongs = async (pages, search, tags, sort = "RatingScore") => {
   try {
     const res = await Axios.get(
-      `/songs?start=${pages}&getTotalCount=true&maxResults=20&query=${search}&fields=AdditionalNames,MainPicture,Pvs&lang=Default&nameMatchMode=Auto&sort=RatingScore&${tags}childTags=false&artistParticipationStatus=Everything&onlyWithPvs=false`,
+      `/songs?start=${pages}&getTotalCount=true&maxResults=20&query=${search}&fields=AdditionalNames,MainPicture,Pvs&lang=Default&nameMatchMode=Auto&sort=${sort}&${tags}childTags=false&artistParticipationStatus=Everything&onlyWithPvs=false`,
     );
     return res.data.items;
   } catch (e) {

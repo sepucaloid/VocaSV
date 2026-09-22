@@ -28,20 +28,15 @@ import { Link } from "react-router-dom";
 
 const Home = () => {
   const { theme } = useTheme();
-  const {
-    play,
-    currentSong,
-    isPlaying,
-    playedSeconds,
-    duration,
-    seek,
-  } = useAudioPlayer();
+  const { play, currentSong, isPlaying, playedSeconds, duration, seek } =
+    useAudioPlayer();
 
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [pages, setPages] = useState(0);
   const [songType, setSongType] = useState("All Types");
+  const [sortBy, setSortBy] = useState("AdditionDate");
   const [urlType, setUrlType] = useState("");
 
   const [typeData, setTypeData] = useState([
@@ -51,6 +46,39 @@ const Home = () => {
       slug: "",
     },
   ]);
+
+  const sortList = [
+    {
+      id: 1,
+      name: "Addition date",
+      value: "AdditionDate",
+    },
+    {
+      id: 2,
+      name: "Publish date",
+      value: "PublishDate",
+    },
+    {
+      id: 3,
+      name: "Rating score",
+      value: "RatingScore",
+    },
+    {
+      id: 4,
+      name: "Name",
+      value: "Name",
+    },
+    {
+      id: 5,
+      name: "Times favorited",
+      value: "FavoritedTimes",
+    },
+    {
+      id: 6,
+      name: "Tag usage count",
+      value: "TagUsageCount",
+    },
+  ];
 
   const cardBg = theme === "dark" ? "#2a2a3e" : "#d9d9d9";
   const textColor = theme === "dark" ? "#e0e0e0" : "#212529";
@@ -83,7 +111,7 @@ const Home = () => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const res = await GetAllSongs(pages, debounceValue, urlType);
+      const res = await GetAllSongs(pages, debounceValue, urlType, sortBy);
       if (res.length === 0) {
         setHasMore(false);
       } else {
@@ -131,7 +159,7 @@ const Home = () => {
     setHasMore(true);
     if (pages !== 0) return;
     fetchData();
-  }, [debounceValue, urlType]);
+  }, [debounceValue, urlType, sortBy]);
 
   useEffect(() => {
     if (loading || !hasMore) return;
@@ -292,14 +320,20 @@ const Home = () => {
                     padding: "5px 14px",
                   }}
                 >
-                  {/* {artist === "All Artists" ? "Artist 🔽" : `${artist} 🔽`} */}
+                  {sortList?.find((t) => t.value === sortBy).name}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  {/* {ARTISTS.map((a) => (
-                    <Dropdown.Item key={a} onClick={() => setArtist(a)} active={artist === a}>
-                      {a}
+                  {sortList?.map((t) => (
+                    <Dropdown.Item
+                      key={t.id}
+                      onClick={() => {
+                        setSortBy(t.value);
+                      }}
+                      active={songType === t.name}
+                    >
+                      {t.name}
                     </Dropdown.Item>
-                  ))} */}
+                  ))}
                 </Dropdown.Menu>
               </Dropdown>
 
@@ -574,7 +608,9 @@ const Home = () => {
                       <Heart
                         size={18}
                         fill={liked.includes(selected?.id) ? "#ee0055" : "none"}
-                        color={liked.includes(selected?.id) ? "#ee0055" : "#999"}
+                        color={
+                          liked.includes(selected?.id) ? "#ee0055" : "#999"
+                        }
                       />
                     </button>
                     <MoreHorizontal
@@ -615,7 +651,12 @@ const Home = () => {
                     variant="outline-secondary"
                     size="sm"
                     onClick={handlePrev}
-                    style={{ borderRadius: 50, width: 36, height: 36, padding: 0 }}
+                    style={{
+                      borderRadius: 50,
+                      width: 36,
+                      height: 36,
+                      padding: 0,
+                    }}
                   >
                     <SkipBack size={16} />
                   </Button>
@@ -644,7 +685,12 @@ const Home = () => {
                     variant="outline-secondary"
                     size="sm"
                     onClick={handleNext}
-                    style={{ borderRadius: 50, width: 36, height: 36, padding: 0 }}
+                    style={{
+                      borderRadius: 50,
+                      width: 36,
+                      height: 36,
+                      padding: 0,
+                    }}
                   >
                     <SkipForward size={16} />
                   </Button>
