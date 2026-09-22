@@ -31,7 +31,7 @@ export const getDetail = async (id) => {
 export const getLyric = async (id) => {
   try {
     const res = await Axios.get(`songs/lyrics/${id}?v=39`);
-    console.log(res);
+    // console.log(res);
     return res;
   } catch (e) {
     console.error(e);
@@ -41,7 +41,7 @@ export const getLyric = async (id) => {
 export const getType = async (id) => {
   try {
     const res = await Axios.get(`/tags/top?lang=Default&categoryName=Genres`);
-    console.log("type", res);
+    // console.log("type", res);
     return res;
   } catch (e) {
     console.error(e);

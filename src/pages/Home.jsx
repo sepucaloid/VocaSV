@@ -60,7 +60,7 @@ const Home = () => {
     },
     {
       id: 3,
-      name: "Rating score",
+      name: "Rating score (The most Famous Vocaloid's Songs)",
       value: "RatingScore",
     },
     {
