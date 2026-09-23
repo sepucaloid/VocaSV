@@ -62,7 +62,7 @@ const Detail = () => {
   const downloadRef = useRef(null);
 
   const darkMode = theme === "dark";
-  const cardBg = darkMode ? "#2a2a3e" : "#322e2e";
+  const cardBg = darkMode ? "#2a2a3e" : "#d9d9d9";
   const textColor = darkMode ? "#e0e0e0" : "#212529";
   const borderColor = darkMode ? "#3a3a5e" : "#ccc";
   const mutedColor = darkMode ? "#888" : "#666";
@@ -435,7 +435,7 @@ const Detail = () => {
                     <Badge
                       style={{
                         background: artColor,
-                        color: "#333",
+                        color: textColor,
                         fontWeight: 500,
                         fontSize: 12,
                         padding: "4px 12px",
@@ -728,6 +728,7 @@ const Detail = () => {
                     {
                       label: "Published",
                       value: DateFormat(song.publishDate),
+                      refeee: downloadRef
                     },
                     {
                       label: "BPM",
@@ -757,9 +758,9 @@ const Detail = () => {
                       label: "Added on",
                       value: DateFormat(song.createDate),
                     },
-                  ].map(({ label, value }) => (
+                  ].map(({ label, value, refeee }) => (
                     <Col xs={12} sm={6} md={2} key={label}>
-                      <DownloadImage label={label} ref={downloadRef}>
+                      <DownloadImage label={label} ref={refeee}>
                         <div
                           style={{
                             fontSize: 11,
