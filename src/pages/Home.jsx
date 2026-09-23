@@ -149,17 +149,38 @@ const Home = () => {
   }, [songs, selected]);
 
   useEffect(() => {
-    fetchData();
-  }, [pages]);
-
-  useEffect(() => {
-    if (loading) return;
     setPages(0);
     setSongs([]);
     setHasMore(true);
-    if (pages !== 0) return;
-    fetchData();
   }, [debounceValue, urlType, sortBy]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const doFetch = async () => {
+      if (loading || !hasMore) return;
+      setLoading(true);
+      try {
+        const res = await GetAllSongs(pages, debounceValue, urlType, sortBy);
+        if (!ignore) {
+          if (res.length === 0) {
+            setHasMore(false);
+          } else {
+            setSongs((prev) => [
+              ...new Map([...prev, ...res].map((item) => [item.id, item])).values(),
+            ]);
+          }
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+
+    doFetch();
+    return () => {
+      ignore = true;
+    };
+  }, [pages, debounceValue, urlType, sortBy]);
 
   useEffect(() => {
     if (loading || !hasMore) return;
