@@ -10,7 +10,7 @@ const Axios = axios.create({
 export const getDetailArtist = async (id) => {
   try {
     const res = await Axios.get(`/artists/${id}/details`);
-    // console.log(res.data);
+    console.log(res.data);
     return res.data;
   } catch (e) {
     console.error(e);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Row, Col, Badge } from "react-bootstrap";
 import {
@@ -29,6 +29,8 @@ import { LangCode } from "../utils/LangCode";
 import { PlatformCode } from "../components/PlatformCode";
 import Layout from "../components/Layout";
 
+import { DownloadImage } from "../components/DownloadImage";
+
 const PALETTE = [
   "#b5c8e8",
   "#c8b5e8",
@@ -43,7 +45,8 @@ const PALETTE = [
 const Detail = () => {
   const { id } = useParams();
   const { theme } = useTheme();
-  const { play, currentSong, isPlaying, playedSeconds, duration, seek } = useAudioPlayer();
+  const { play, currentSong, isPlaying, playedSeconds, duration, seek } =
+    useAudioPlayer();
 
   const [data, setData] = useState(null);
   const [lyric, setLyric] = useState("");
@@ -56,8 +59,10 @@ const Detail = () => {
   const [downloadError, setDownloadError] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  const downloadRef = useRef(null);
+
   const darkMode = theme === "dark";
-  const cardBg = darkMode ? "#2a2a3e" : "#d9d9d9";
+  const cardBg = darkMode ? "#2a2a3e" : "#322e2e";
   const textColor = darkMode ? "#e0e0e0" : "#212529";
   const borderColor = darkMode ? "#3a3a5e" : "#ccc";
   const mutedColor = darkMode ? "#888" : "#666";
@@ -70,14 +75,18 @@ const Detail = () => {
 
   const tags = data?.tags?.map((item) => item?.tag);
 
-  const producers = data?.artists?.filter((a) => a.categories?.includes("Producer")) || [];
-  const vocalists = data?.artists?.filter((a) => a.categories === "Vocalist") || [];
-  const otherArtists = data?.artists?.filter((a) =>
-    a.categories?.includes("Illustrator") ||
-    a.categories?.includes("Animator") ||
-    a.categories === "Circle" ||
-    a.categories === "Other"
-  ) || [];
+  const producers =
+    data?.artists?.filter((a) => a.categories?.includes("Producer")) || [];
+  const vocalists =
+    data?.artists?.filter((a) => a.categories === "Vocalist") || [];
+  const otherArtists =
+    data?.artists?.filter(
+      (a) =>
+        a.categories?.includes("Illustrator") ||
+        a.categories?.includes("Animator") ||
+        a.categories === "Circle" ||
+        a.categories === "Other",
+    ) || [];
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -94,7 +103,9 @@ const Detail = () => {
       }
     };
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   useEffect(() => {
@@ -102,19 +113,23 @@ const Detail = () => {
       let cancelled = false;
       const run = async () => {
         try {
-          const res = await getLyric(data.lyricsFromParents[activeLyricIndex]?.id);
+          const res = await getLyric(
+            data.lyricsFromParents[activeLyricIndex]?.id,
+          );
           if (!cancelled) setLyric(res?.data?.value || "");
         } catch (e) {
           console.error(e);
         }
       };
       run();
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }
   }, [data, activeLyricIndex]);
 
   const youtubePv = data?.pvs?.find(
-    (pv) => pv.service === "Youtube" || pv.url?.includes("youtu")
+    (pv) => pv.service === "Youtube" || pv.url?.includes("youtu"),
   );
 
   const copySongInfo = async () => {
@@ -127,23 +142,34 @@ const Detail = () => {
     }
 
     if (vocalists.length > 0) {
-      lines.push(`Vocalists\t${vocalists.map((a) => a.artist?.name).join(", ")}`);
+      lines.push(
+        `Vocalists\t${vocalists.map((a) => a.artist?.name).join(", ")}`,
+      );
     }
 
     if (producers.length > 0) {
-      lines.push(`Producers\t${producers.map((a) => a.artist?.name).join(", ")}`);
+      lines.push(
+        `Producers\t${producers.map((a) => a.artist?.name).join(", ")}`,
+      );
     }
 
-    const animators = data?.artists?.filter((a) => a.categories?.includes("Animator")) || [];
+    const animators =
+      data?.artists?.filter((a) => a.categories?.includes("Animator")) || [];
     if (animators.length > 0) {
-      lines.push(`Animators\t${animators.map((a) => a.artist?.name).join(", ")}`);
+      lines.push(
+        `Animators\t${animators.map((a) => a.artist?.name).join(", ")}`,
+      );
     }
 
     if (otherArtists.length > 0) {
-      lines.push(`Other artists\t${otherArtists.map((a) => `${a.artist?.name} (${a.effectiveRoles})`).join(", ")}`);
+      lines.push(
+        `Other artists\t${otherArtists.map((a) => `${a.artist?.name} (${a.effectiveRoles})`).join(", ")}`,
+      );
     }
 
-    lines.push(`Type\t${song.songType === "Original" ? "O Original song" : song.songType}`);
+    lines.push(
+      `Type\t${song.songType === "Original" ? "O Original song" : song.songType}`,
+    );
     lines.push(`Duration\t${DurationFormat(song.lengthSeconds)}`);
     lines.push(`Language(s)\t${song.defaultNameLanguage}`);
     lines.push(`BPM\t${BpmFormat(data?.minMilliBpm, data?.maxMilliBpm)}`);
@@ -153,7 +179,9 @@ const Detail = () => {
     }
 
     if (data?.pvs?.length > 0) {
-      const pvLines = data.pvs.map((pv) => `${pv.service}\t${pv.name || pv.service}\t${pv.url}`);
+      const pvLines = data.pvs.map(
+        (pv) => `${pv.service}\t${pv.name || pv.service}\t${pv.url}`,
+      );
       lines.push(`PV Sources\t`);
       lines.push(pvLines.join("\n"));
     }
@@ -193,7 +221,13 @@ const Detail = () => {
   };
 
   useEffect(() => {
-    if (activeTab !== "download" || !youtubePv || downloadLinks || loadingDownload) return;
+    if (
+      activeTab !== "download" ||
+      !youtubePv ||
+      downloadLinks ||
+      loadingDownload
+    )
+      return;
 
     let cancelled = false;
     const run = async () => {
@@ -213,7 +247,9 @@ const Detail = () => {
       }
     };
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [activeTab, youtubePv, downloadLinks, loadingDownload]);
 
   if (loading) {
@@ -227,7 +263,11 @@ const Detail = () => {
             justifyContent: "center",
           }}
         >
-          <div className={`spinner-border ${theme === "dark" ? "text-white" : "text-black"}`} role="status" style={{ width: 50, height: 50 }}>
+          <div
+            className={`spinner-border ${theme === "dark" ? "text-white" : "text-black"}`}
+            role="status"
+            style={{ width: 50, height: 50 }}
+          >
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -356,6 +396,16 @@ const Detail = () => {
                   >
                     {song.defaultName}
                   </h3>
+                  <h6
+                    style={{
+                      fontWeight: 400,
+                      color: darkMode ? "#fff" : "#1a1a2e",
+                      marginBottom: 4,
+                      fontSize: "clamp(10px, 3vw, 16x)",
+                    }}
+                  >
+                    {data?.additionalNames}
+                  </h6>
                   <p
                     style={{
                       color: mutedColor,
@@ -370,7 +420,10 @@ const Detail = () => {
                             <Link
                               to={`/artist/${a.artist?.id}`}
                               className="artist-link"
-                              style={{ color: mutedColor, textDecoration: "underline" }}
+                              style={{
+                                color: mutedColor,
+                                textDecoration: "underline",
+                              }}
                             >
                               {a.artist?.name}
                             </Link>
@@ -569,7 +622,11 @@ const Detail = () => {
             {[
               { key: "details", label: "Details", icon: <Music size={15} /> },
               { key: "lyrics", label: "Lyrics", icon: <ListMusic size={15} /> },
-              { key: "download", label: "Download", icon: <Download size={15} /> },
+              // {
+              //   key: "download",
+              //   label: "Download",
+              //   icon: <Download size={15} />,
+              // },
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -616,9 +673,7 @@ const Detail = () => {
                                 ? "#3a3a5e"
                                 : "#e0e0e0",
                           color:
-                            activeLyricIndex === index
-                              ? "#fff"
-                              : textColor,
+                            activeLyricIndex === index ? "#fff" : textColor,
                           border: "none",
                           borderRadius: 20,
                           padding: "4px 14px",
@@ -661,8 +716,11 @@ const Detail = () => {
               <div>
                 <Row className="g-3">
                   {[
-                    { label: "Title", value: song.defaultName },
-                    { label: "Type", value: song.songType },
+                    {
+                      label: "Title",
+                      value: song.defaultName,
+                    },
+                    { label: "Type", value: song.songType, extra: "" },
                     {
                       label: "Duration",
                       value: DurationFormat(song.lengthSeconds),
@@ -700,14 +758,8 @@ const Detail = () => {
                       value: DateFormat(song.createDate),
                     },
                   ].map(({ label, value }) => (
-                    <Col xs={12} sm={6} md={3} key={label}>
-                      <div
-                        style={{
-                          background: darkMode ? "#1e1e32" : "#e8e8e8",
-                          borderRadius: 14,
-                          padding: "14px 16px",
-                        }}
-                      >
+                    <Col xs={12} sm={6} md={2} key={label}>
+                      <DownloadImage label={label} ref={downloadRef}>
                         <div
                           style={{
                             fontSize: 11,
@@ -728,7 +780,7 @@ const Detail = () => {
                         >
                           {value || "—"}
                         </div>
-                      </div>
+                      </DownloadImage>
                     </Col>
                   ))}
                 </Row>
@@ -927,15 +979,35 @@ const Detail = () => {
             {activeTab === "download" && (
               <div>
                 {loadingDownload ? (
-                  <div className="d-flex flex-column align-items-center justify-content-center" style={{ padding: 40 }}>
-                    <div className={`spinner-border ${theme === "dark" ? "text-white" : "text-black"}`} role="status" style={{ width: 40, height: 40 }}>
+                  <div
+                    className="d-flex flex-column align-items-center justify-content-center"
+                    style={{ padding: 40 }}
+                  >
+                    <div
+                      className={`spinner-border ${theme === "dark" ? "text-white" : "text-black"}`}
+                      role="status"
+                      style={{ width: 40, height: 40 }}
+                    >
                       <span className="visually-hidden">Loading...</span>
                     </div>
-                    <span style={{ color: mutedColor, fontSize: 13, marginTop: 12 }}>Loading download options...</span>
+                    <span
+                      style={{ color: mutedColor, fontSize: 13, marginTop: 12 }}
+                    >
+                      Loading download options...
+                    </span>
                   </div>
                 ) : downloadError || !youtubePv ? (
-                  <div className="d-flex flex-column align-items-center justify-content-center" style={{ padding: 40 }}>
-                    <p style={{ color: mutedColor, fontSize: 14, marginBottom: 12 }}>
+                  <div
+                    className="d-flex flex-column align-items-center justify-content-center"
+                    style={{ padding: 40 }}
+                  >
+                    <p
+                      style={{
+                        color: mutedColor,
+                        fontSize: 14,
+                        marginBottom: 12,
+                      }}
+                    >
                       {downloadError || "No YouTube source found"}
                     </p>
                     {youtubePv && (
@@ -961,7 +1033,15 @@ const Detail = () => {
                     {/* MP4 Section */}
                     {downloadLinks.mp4?.length > 0 && (
                       <div>
-                        <div style={{ fontSize: 13, color: mutedColor, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: mutedColor,
+                            marginBottom: 10,
+                            textTransform: "uppercase",
+                            letterSpacing: 0.8,
+                          }}
+                        >
                           Video (MP4)
                         </div>
                         <div className="d-flex flex-wrap gap-2">
@@ -989,7 +1069,9 @@ const Detail = () => {
                                 e.currentTarget.style.borderColor = "#5a8dee";
                               }}
                               onMouseLeave={(e) => {
-                                e.currentTarget.style.background = darkMode ? "#2a2a3e" : "#d9d9d9";
+                                e.currentTarget.style.background = darkMode
+                                  ? "#2a2a3e"
+                                  : "#d9d9d9";
                                 e.currentTarget.style.color = textColor;
                                 e.currentTarget.style.borderColor = borderColor;
                               }}
@@ -1003,9 +1085,19 @@ const Detail = () => {
                     )}
 
                     {/* MP3 Section */}
-                    {Object.values(downloadLinks.mp3).some(v => v !== null) && (
+                    {Object.values(downloadLinks.mp3).some(
+                      (v) => v !== null,
+                    ) && (
                       <div>
-                        <div style={{ fontSize: 13, color: mutedColor, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: mutedColor,
+                            marginBottom: 10,
+                            textTransform: "uppercase",
+                            letterSpacing: 0.8,
+                          }}
+                        >
                           Audio (MP3)
                         </div>
                         <div className="d-flex flex-wrap gap-2">
@@ -1015,7 +1107,11 @@ const Detail = () => {
                             return (
                               <button
                                 key={quality}
-                                onClick={() => downloadFile(`https://api-wh.savefrom.co.id${streamPath}`)}
+                                onClick={() =>
+                                  downloadFile(
+                                    `https://api-wh.savefrom.co.id${streamPath}`,
+                                  )
+                                }
                                 style={{
                                   display: "inline-flex",
                                   alignItems: "center",
@@ -1036,9 +1132,12 @@ const Detail = () => {
                                   e.currentTarget.style.borderColor = "#5a8dee";
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = darkMode ? "#2a2a3e" : "#d9d9d9";
+                                  e.currentTarget.style.background = darkMode
+                                    ? "#2a2a3e"
+                                    : "#d9d9d9";
                                   e.currentTarget.style.color = textColor;
-                                  e.currentTarget.style.borderColor = borderColor;
+                                  e.currentTarget.style.borderColor =
+                                    borderColor;
                                 }}
                               >
                                 <Download size={14} />
@@ -1051,7 +1150,12 @@ const Detail = () => {
                     )}
 
                     {/* Open Source Link */}
-                    <div style={{ borderTop: `1px solid ${borderColor}`, paddingTop: 12 }}>
+                    <div
+                      style={{
+                        borderTop: `1px solid ${borderColor}`,
+                        paddingTop: 12,
+                      }}
+                    >
                       <a
                         href={youtubePv?.url}
                         target="_blank"
@@ -1070,7 +1174,14 @@ const Detail = () => {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ color: mutedColor, fontSize: 14, textAlign: "center", padding: 40 }}>
+                  <div
+                    style={{
+                      color: mutedColor,
+                      fontSize: 14,
+                      textAlign: "center",
+                      padding: 40,
+                    }}
+                  >
                     No downloadable sources available.
                   </div>
                 )}

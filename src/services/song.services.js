@@ -22,6 +22,7 @@ export const GetAllSongs = async (pages, search, tags, sort = "RatingScore") => 
 export const getDetail = async (id) => {
   try {
     const res = await Axios.get(`/songs/${id}/details?fields=AdditionalNames`);
+    // console.log(res.data)
     return res;
   } catch (e) {
     console.error(e);

@@ -67,7 +67,9 @@ const ArtistDetail = () => {
       }
     };
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   if (loading) {
@@ -82,7 +84,7 @@ const ArtistDetail = () => {
           }}
         >
           <div
-            className="spinner-border"
+            className={`spinner-border ${theme === "dark" ? "text-white" : "text-black"}`}
             role="status"
             style={{ width: 50, height: 50 }}
           >
@@ -281,9 +283,7 @@ const ArtistDetail = () => {
                       Language:{" "}
                     </span>
                     <span style={{ fontSize: 14, color: textColor }}>
-                      {data.cultureCodes
-                        .map((c) => LangCode(c))
-                        .join(", ")}
+                      {data.cultureCodes.map((c) => LangCode(c)).join(", ")}
                     </span>
                   </div>
                 )}
@@ -313,7 +313,7 @@ const ArtistDetail = () => {
                     <Badge
                       style={{
                         background: artColor,
-                        color: "#333",
+                        color: textColor,
                         fontWeight: 500,
                         fontSize: 12,
                         padding: "4px 12px",
@@ -458,7 +458,9 @@ const ArtistDetail = () => {
                           },
                         ]
                       : []),
-                    ...(data.status ? [{ label: "Status", value: data.status }] : []),
+                    ...(data.status
+                      ? [{ label: "Status", value: data.status }]
+                      : []),
                     ...(data.createDate
                       ? [
                           {
