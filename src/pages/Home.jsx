@@ -106,23 +106,7 @@ const Home = () => {
   const debounceValue = useDebounce(input, 600);
 
   const observerRef = useRef(null);
-
-  const fetchData = async () => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-    try {
-      const res = await GetAllSongs(pages, debounceValue, urlType, sortBy);
-      if (res.length === 0) {
-        setHasMore(false);
-      } else {
-        setSongs((prev) => [
-          ...new Map([...prev, ...res].map((item) => [item.id, item])).values(),
-        ]);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const prevFilters = useRef({ debounceValue, urlType, sortBy });
 
   useEffect(() => {
     const fetchType = async () => {
@@ -149,27 +133,35 @@ const Home = () => {
   }, [songs, selected]);
 
   useEffect(() => {
-    setPages(0);
-    setSongs([]);
-    setHasMore(true);
+    const filtersChanged =
+      prevFilters.current.debounceValue !== debounceValue ||
+      prevFilters.current.urlType !== urlType ||
+      prevFilters.current.sortBy !== sortBy;
+    prevFilters.current = { debounceValue, urlType, sortBy };
+
+    if (filtersChanged) {
+      setPages(0);
+      setSongs([]);
+      setHasMore(true);
+    }
   }, [debounceValue, urlType, sortBy]);
 
   useEffect(() => {
     let ignore = false;
 
     const doFetch = async () => {
-      if (loading || !hasMore) return;
       setLoading(true);
       try {
         const res = await GetAllSongs(pages, debounceValue, urlType, sortBy);
-        if (!ignore) {
-          if (res.length === 0) {
-            setHasMore(false);
-          } else {
-            setSongs((prev) => [
-              ...new Map([...prev, ...res].map((item) => [item.id, item])).values(),
-            ]);
-          }
+        if (ignore) return;
+        if (!res || res.length === 0) {
+          setHasMore(false);
+        } else if (pages === 0) {
+          setSongs(res);
+        } else {
+          setSongs((prev) => [
+            ...new Map([...prev, ...res].map((item) => [item.id, item])).values(),
+          ]);
         }
       } finally {
         if (!ignore) setLoading(false);
@@ -183,7 +175,7 @@ const Home = () => {
   }, [pages, debounceValue, urlType, sortBy]);
 
   useEffect(() => {
-    if (loading || !hasMore) return;
+    if (loading || !hasMore || songs.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -200,7 +192,7 @@ const Home = () => {
     }
 
     return () => observer.disconnect();
-  }, [loading, hasMore]);
+  }, [loading, hasMore, songs.length]);
 
   const selectedIndex = songs.findIndex((s) => s.id === selected?.id);
 
